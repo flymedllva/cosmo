@@ -186,6 +186,18 @@ func (r *SubgraphCircuitBreakerOptions) IsEnabled() bool {
 	return r.CircuitBreaker.Enabled || len(r.SubgraphMap) > 0
 }
 
+func (r *Router) IsShutdown() bool {
+	return r.shutdown.Load()
+}
+
+func (r *Router) HTTPServer() *server {
+	return r.httpServer
+}
+
+func (r *Router) Healthcheck() health.Checker {
+	return r.healthcheck
+}
+
 // NewRouter creates a new Router instance. Router.Start() must be called to start the server.
 // Alternatively, use Router.NewServer() to create a new server instance without starting it.
 func NewRouter(opts ...Option) (*Router, error) {
@@ -594,9 +606,9 @@ func NewRouter(opts ...Option) (*Router, error) {
 	return r, nil
 }
 
-// newGraphServer creates a new server.
+// NewGraphServer creates a new server.
 func (r *Router) newServer(ctx context.Context, cfg *nodev1.RouterConfig) error {
-	server, err := newGraphServer(ctx, r, cfg, r.proxy)
+	server, err := NewGraphServer(ctx, r, cfg, r.proxy)
 	if err != nil {
 		r.logger.Error("Failed to create graph server. Keeping the old server", zap.Error(err))
 		return err
@@ -727,7 +739,7 @@ func (r *Router) BaseURL() string {
 // NewServer prepares a new server instance but does not start it. The method should only be used when you want to bootstrap
 // the server manually otherwise you can use Router.Start(). You're responsible for setting health checks status to ready with Server.HealthChecks().
 // The server can be shutdown with Router.Shutdown(). Use core.WithExecutionConfig to pass the initial config otherwise the Router will
-// try to fetch the config from the control plane. You can swap the router config by using Router.newGraphServer().
+// try to fetch the config from the control plane. You can swap the router config by using Router.NewGraphServer().
 func (r *Router) NewServer(ctx context.Context) (Server, error) {
 	if r.shutdown.Load() {
 		return nil, fmt.Errorf("router is shutdown. Create a new instance with router.NewRouter()")
