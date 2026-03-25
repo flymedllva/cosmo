@@ -129,8 +129,8 @@ type buildMultiGraphHandlerOptions struct {
 	reloadPersistentState *ReloadPersistentState
 }
 
-// newGraphServer creates a new server instance.
-func newGraphServer(ctx context.Context, r *Router, routerConfig *nodev1.RouterConfig, proxy ProxyFunc) (*graphServer, error) {
+// NewGraphServer creates a new server instance.
+func NewGraphServer(ctx context.Context, r *Router, routerConfig *nodev1.RouterConfig, proxy ProxyFunc) (*graphServer, error) {
 	/* Older versions of composition will not populate a compatibility version.
 	 * Currently, all "old" router execution configurations are compatible as there have been no breaking
 	 * changes.
